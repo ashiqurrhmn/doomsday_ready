@@ -2,10 +2,13 @@ import express from "express";
 import mongoose from "mongoose";
 import "dotenv/config";
 
+import movieRoutes from "./routes/movie.routes.js";
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
+app.use("/api/movies", movieRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({
@@ -31,5 +34,16 @@ async function startServer() {
     process.exit(1);
   }
 }
+
+app.use((error, req, res, next) => {
+  console.error(error);
+
+  res.status(500).json({
+    error: {
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Something went wrong",
+    },
+  });
+});
 
 startServer();
