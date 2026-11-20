@@ -47,3 +47,48 @@ export function hasCircularDependency(
 
   return visit(movieId.toString());
 }
+
+export function buildRewatchOrder(movies, targetId) {
+  const movieMap = new Map();
+
+  for (const movie of movies) {
+    movieMap.set(movie._id.toString(), movie);
+  }
+
+  const targetMovie = movieMap.get(targetId.toString());
+
+  if (!targetMovie) {
+    return [];
+  }
+
+  const visited = new Set();
+  const orderedIds = [];
+
+  function visit(movieId) {
+    const id = movieId.toString();
+
+    if (visited.has(id)) {
+      return;
+    }
+
+    visited.add(id);
+
+    const movie = movieMap.get(id);
+
+    if (!movie) {
+      return;
+    }
+
+    for (const prerequisiteId of movie.prerequisiteIds) {
+      visit(prerequisiteId);
+    }
+
+    orderedIds.push(id);
+  }
+
+  for (const prerequisiteId of targetMovie.prerequisiteIds) {
+    visit(prerequisiteId);
+  }
+
+  return orderedIds;
+}

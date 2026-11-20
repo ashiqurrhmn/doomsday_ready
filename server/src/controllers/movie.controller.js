@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import Movie from "../models/Movie.js";
-import { hasCircularDependency } from "../services/movieGraph.js";
+import {
+  buildRewatchOrder,
+  hasCircularDependency,
+} from "../services/movieGraph.js";
 
 export async function createMovie(req, res, next) {
   try {
@@ -354,6 +357,67 @@ export async function updateMovie(req, res, next) {
       });
     }
 
+    return next(error);
+  }
+}
+
+export async function getMovieRewatchOrder(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.isObjectIdOrHexString(id)) {
+      return res.status(400).json({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Movie ID is invalid",
+        },
+      });
+    }
+
+    const movies = await Movie.find()
+      .select("title releaseYear runtimeMinutes prerequisiteIds watched")
+      .lean();
+
+    const targetMovie = movies.find(
+      (movie) => movie._id.toString() === id.toString(),
+    );
+
+    if (!targetMovie) {
+      return res.status(404).json({
+        error: {
+          code: "NOT_FOUND",
+          message: "Movie not found",
+        },
+      });
+    }
+
+    const orderedIds = buildRewatchOrder(movies, id);
+
+    const movieMap = new Map(
+      movies.map((movie) => [movie._id.toString(), movie]),
+    );
+
+    const orderedMovies = orderedIds
+      .map((movieId) => movieMap.get(movieId))
+      .filter(Boolean);
+
+    const watchedCount = orderedMovies.filter(
+      (movie) => movie.watched,
+    ).length;
+
+    const remainingRuntimeMinutes = orderedMovies
+      .filter((movie) => !movie.watched)
+      .reduce((total, movie) => total + movie.runtimeMinutes, 0);
+
+    return res.status(200).json({
+      targetId: targetMovie._id,
+      targetTitle: targetMovie.title,
+      movies: orderedMovies,
+      totalMovies: orderedMovies.length,
+      watchedCount,
+      remainingRuntimeMinutes,
+    });
+  } catch (error) {
     return next(error);
   }
 }
