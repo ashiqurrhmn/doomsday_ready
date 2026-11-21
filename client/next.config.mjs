@@ -4,6 +4,16 @@ const nextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  async rewrites() {
+    const apiOrigin = process.env.API_ORIGIN || "http://127.0.0.1:5000";
+
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${apiOrigin}/api/:path*`,
+      },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {
