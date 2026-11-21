@@ -134,7 +134,10 @@ export default function BookingView() {
         { signal: controller.signal },
       );
 
-      if (!controller.signal.aborted && requestCounterRef.current === requestId) {
+      if (
+        !controller.signal.aborted &&
+        requestCounterRef.current === requestId
+      ) {
         setQuote(data);
       }
     } catch (error) {
@@ -145,117 +148,165 @@ export default function BookingView() {
         setQuoteError(getErrorMessage(error));
       }
     } finally {
-      if (!controller.signal.aborted && requestCounterRef.current === requestId) {
+      if (
+        !controller.signal.aborted &&
+        requestCounterRef.current === requestId
+      ) {
         setIsSubmitting(false);
       }
     }
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-      <header className="max-w-3xl">
-        <p className="font-mono text-sm font-semibold uppercase tracking-[0.2em] text-red-400">
-          Cinema booking
-        </p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-          Book the watch party
-        </h1>
-        <p className="mt-4 text-lg leading-8 text-zinc-300">
-          Choose an opening-night cinema and enter your group size to find the
-          minimum number of seat bundles that fit your group exactly.
-        </p>
-      </header>
+    <div className="relative isolate min-h-screen overflow-hidden bg-[#06070b]">
+      {/* Premiere-Night Widescreen Top Backdrop */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[460px] overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/heroes/endgame.jpg?v=8"
+          alt=""
+          aria-hidden="true"
+          className="h-full w-full scale-105 object-cover object-center opacity-35 blur-xl"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06070b]/45 via-[#06070b]/85 to-[#06070b]" />
+      </div>
 
-      {cinemasError ? (
-        <div
-          role="alert"
-          className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-red-400/30 bg-red-950/30 px-5 py-4 text-red-200"
-        >
-          <div>
-            <p className="font-semibold">Could not load cinemas.</p>
-            <p className="mt-1 text-sm text-red-200/80">{cinemasError}</p>
+      <div className="mx-auto w-full max-w-[1380px] px-6 pb-20 pt-28 sm:px-10 sm:pt-32 lg:px-14">
+        <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-3.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-300 backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.28)]">
+              <span className="size-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]" />
+              Opening-Night Watch Party
+            </span>
+            <h1 className="mt-4 text-4xl font-black uppercase tracking-[-0.03em] text-white drop-shadow sm:text-5xl lg:text-6xl">
+              Book The Watch Party
+            </h1>
+            <p className="mt-3 text-base leading-7 text-zinc-300 sm:text-lg">
+              Opening-night seats are sold in group bundles. Pick a cinema and
+              enter your group size (1–10,000) to calculate the minimum exact
+              bundles with zero empty seats.
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={handleRetryCinemas}
-            className="rounded-xl border border-red-300/30 bg-red-500/20 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500/30"
+
+          <dl className="grid grid-cols-2 gap-3 sm:min-w-[320px]">
+            <div className="rounded-2xl border border-white/15 bg-white/[0.06] p-4 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_12px_28px_rgba(0,0,0,0.35)]">
+              <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-zinc-400">
+                Cinemas
+              </dt>
+              <dd className="mt-1.5 text-2xl font-black text-white sm:text-3xl">
+                {cinemas.length}
+              </dd>
+              <p className="mt-1 font-mono text-[11px] text-zinc-400">
+                Premiere venues
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/15 bg-white/[0.06] p-4 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_12px_28px_rgba(0,0,0,0.35)]">
+              <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-zinc-400">
+                Max Group
+              </dt>
+              <dd className="mt-1.5 text-2xl font-black text-emerald-300 sm:text-3xl">
+                10,000
+              </dd>
+              <p className="mt-1 font-mono text-[11px] text-zinc-400">
+                0 wasted seats
+              </p>
+            </div>
+          </dl>
+        </header>
+
+        {cinemasError ? (
+          <div
+            role="alert"
+            className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-rose-400/35 bg-rose-950/35 px-5 py-4 text-rose-100 backdrop-blur-2xl"
           >
-            Try again
-          </button>
-        </div>
-      ) : null}
-
-      {isLoadingCinemas ? (
-        <div
-          className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
-          aria-label="Loading cinemas"
-        >
-          <div className="h-96 animate-pulse rounded-3xl border border-white/10 bg-white/[0.04]" />
-          <div className="h-72 animate-pulse rounded-3xl border border-white/10 bg-white/[0.04]" />
-        </div>
-      ) : cinemas.length === 0 && !cinemasError ? (
-        <section className="mt-10 rounded-3xl border border-dashed border-white/15 bg-white/[0.02] p-10 text-center">
-          <h2 className="text-2xl font-semibold text-white">
-            No cinemas available yet
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-zinc-400">
-            Seed the database or add a cinema via the API (`POST /api/cinemas`)
-            before calculating a watch-party booking quote.
-          </p>
-        </section>
-      ) : cinemas.length > 0 ? (
-        <div className="mt-10 grid items-start gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <div className="lg:sticky lg:top-28">
-            <BookingForm
-              cinemas={cinemas}
-              selectedCinemaId={selectedCinemaId}
-              selectedCinema={selectedCinema}
-              groupSize={groupSize}
-              validationError={validationError}
-              isSubmitting={isSubmitting}
-              onCinemaChange={handleCinemaChange}
-              onGroupSizeChange={handleGroupSizeChange}
-              onSubmit={handleSubmit}
-            />
+            <div>
+              <p className="font-bold text-white">Could not load cinemas.</p>
+              <p className="mt-1 text-sm text-rose-200/85">{cinemasError}</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleRetryCinemas}
+              className="rounded-full border border-white/25 bg-white/[0.14] px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-white/[0.22]"
+            >
+              Try Again
+            </button>
           </div>
+        ) : null}
 
-          <div className="grid gap-6">
-            {quoteError ? (
-              <div
-                role="alert"
-                className="rounded-2xl border border-red-400/30 bg-red-950/30 px-5 py-4 text-red-200"
-              >
-                <p className="font-semibold">
-                  Could not calculate the booking quote.
-                </p>
-                <p className="mt-1 text-sm text-red-200/80">{quoteError}</p>
-              </div>
-            ) : null}
-
-            {isSubmitting ? (
-              <div
-                className="h-80 animate-pulse rounded-3xl border border-white/10 bg-white/[0.04]"
-                aria-label="Calculating booking quote"
+        {isLoadingCinemas ? (
+          <div
+            className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]"
+            aria-label="Loading cinemas"
+          >
+            <div className="h-[460px] animate-pulse rounded-3xl border border-white/10 bg-white/[0.04]" />
+            <div className="h-80 animate-pulse rounded-3xl border border-white/10 bg-white/[0.04]" />
+          </div>
+        ) : cinemas.length === 0 && !cinemasError ? (
+          <section className="mt-10 rounded-3xl border border-dashed border-white/15 bg-white/[0.03] p-12 text-center backdrop-blur-xl">
+            <h2 className="text-2xl font-bold text-white">
+              No cinemas available yet
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-zinc-400">
+              Seed the database or add a cinema via the API (`POST /api/cinemas`)
+              before calculating a watch-party booking quote.
+            </p>
+          </section>
+        ) : cinemas.length > 0 ? (
+          <div className="mt-10 grid items-start gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+            <div className="lg:sticky lg:top-24">
+              <BookingForm
+                cinemas={cinemas}
+                selectedCinemaId={selectedCinemaId}
+                selectedCinema={selectedCinema}
+                groupSize={groupSize}
+                validationError={validationError}
+                isSubmitting={isSubmitting}
+                onCinemaChange={handleCinemaChange}
+                onGroupSizeChange={handleGroupSizeChange}
+                onSubmit={handleSubmit}
               />
-            ) : quote ? (
-              <BookingResult quote={quote} cinema={selectedCinema} />
-            ) : !quoteError ? (
-              <section className="rounded-3xl border border-dashed border-white/15 bg-white/[0.02] p-10 text-center">
-                <p className="font-mono text-sm uppercase tracking-[0.18em] text-zinc-500">
-                  Ready to calculate
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold text-white">
-                  Enter your watch-party details
-                </h2>
-                <p className="mx-auto mt-3 max-w-md leading-7 text-zinc-400">
-                  Select a cinema and enter how many seats you need. We will
-                  show the fewest bundles that match your group size exactly.
-                </p>
-              </section>
-            ) : null}
+            </div>
+
+            <div className="grid gap-6">
+              {quoteError ? (
+                <div
+                  role="alert"
+                  className="rounded-2xl border border-rose-400/35 bg-rose-950/35 px-5 py-4 text-rose-100 backdrop-blur-2xl"
+                >
+                  <p className="font-bold text-white">
+                    Could not calculate the booking quote.
+                  </p>
+                  <p className="mt-1 text-sm text-rose-200/85">{quoteError}</p>
+                </div>
+              ) : null}
+
+              {isSubmitting ? (
+                <div
+                  className="h-80 animate-pulse rounded-3xl border border-white/10 bg-white/[0.04]"
+                  aria-label="Calculating booking quote"
+                />
+              ) : quote ? (
+                <BookingResult quote={quote} cinema={selectedCinema} />
+              ) : !quoteError ? (
+                <section className="rounded-3xl border border-dashed border-white/15 bg-white/[0.03] p-12 text-center backdrop-blur-2xl">
+                  <span className="inline-flex rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-300">
+                    Ready to calculate
+                  </span>
+                  <h2 className="mt-4 text-2xl font-bold text-white">
+                    Enter your watch-party details
+                  </h2>
+                  <p className="mx-auto mt-3 max-w-md leading-7 text-zinc-400">
+                    Select a premiere cinema on the left and enter how many
+                    seats your group needs. We will compute the fewest exact
+                    bundles so nobody pays for an empty seat.
+                  </p>
+                </section>
+              ) : null}
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -19,13 +19,13 @@ export const metadata = {
     template: "%s | Doomsday Ready",
   },
   description:
-    "Plan your movie rewatch and book the exact number of cinema seats.",
+    "Plan your MCU movie rewatch order and book the exact minimum seat bundles for opening night.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>
+      <body className="antialiased">
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <main className="flex-1">{children}</main>

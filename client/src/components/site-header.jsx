@@ -1,50 +1,106 @@
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const navigation = [
+  { href: "/", label: "Dashboard" },
   { href: "/movies", label: "Movies" },
   { href: "/rewatch", label: "Rewatch Plan" },
   { href: "/booking", label: "Booking" },
 ];
 
 export default function SiteHeader() {
-  return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/85 backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <Link
-          href="/"
-          className="flex w-fit items-center gap-3 rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-300"
-          aria-label="Doomsday Ready home"
-        >
-          <span
-            aria-hidden="true"
-            className="grid size-10 place-items-center rounded-xl bg-red-600 font-mono text-sm font-bold text-white shadow-lg shadow-red-950/50"
-          >
-            DR
-          </span>
-          <span>
-            <span className="block font-semibold tracking-tight text-white">
-              Doomsday Ready
-            </span>
-            <span className="block text-sm text-zinc-400">
-              Movie marathon planner
-            </span>
-          </span>
-        </Link>
+  const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
 
+  useEffect(() => {
+    function handleScroll() {
+      setIsScrolled(window.scrollY > 20);
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? "bg-black/30 backdrop-blur-md"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="mx-auto flex w-full max-w-[1380px] items-center justify-between px-6 py-6 sm:px-10 lg:px-14">
+        {/* Left: Clean Minimalist Uppercase Links (Exact match to reference) */}
         <nav aria-label="Main navigation">
-          <ul className="flex flex-wrap gap-1 rounded-xl border border-white/10 bg-white/[0.04] p-1 text-sm font-medium text-zinc-300">
-            {navigation.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="block rounded-lg px-3 py-2 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-red-300"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+          <ul className="flex flex-wrap items-center gap-6 sm:gap-10 lg:gap-12">
+            {navigation.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`text-xs font-bold uppercase tracking-[0.12em] transition-opacity duration-200 sm:text-[13px] ${
+                      isActive
+                        ? "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
+                        : "text-white/75 hover:text-white"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
+
+        {/* Right: Minimal Search Icon + Circular Avatar Badge */}
+        <div className="flex items-center gap-5 sm:gap-6">
+          <Link
+            href="/movies"
+            aria-label="Search or manage movies"
+            title="Movies library"
+            className="text-white/85 transition hover:scale-110 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-5 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.8-3.8" />
+            </svg>
+          </Link>
+
+          <Link
+            href="/booking"
+            aria-label="Watch-party booking"
+            title="Watch-party booking"
+            className="relative size-9 shrink-0 overflow-hidden rounded-full ring-2 ring-white/80 shadow-[0_4px_14px_rgba(0,0,0,0.5)] transition hover:scale-105 hover:ring-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+          >
+            <Image
+              src="/images/posters/iron-man.jpg"
+              alt="Profile avatar"
+              fill
+              sizes="36px"
+              className="object-cover object-top"
+            />
+          </Link>
+        </div>
       </div>
     </header>
   );

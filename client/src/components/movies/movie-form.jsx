@@ -78,21 +78,28 @@ export default function MovieForm({ movies, isSaving, onCreate }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 sm:p-8"
+      className="rounded-3xl border border-white/15 bg-white/[0.06] p-6 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.28),0_20px_50px_rgba(0,0,0,0.45)] sm:p-8"
     >
-      <div>
-        <p className="font-mono text-sm font-semibold uppercase tracking-[0.18em] text-red-400">
-          Add to the timeline
-        </p>
-        <h2 className="mt-3 text-2xl font-semibold text-white">New movie</h2>
-        <p className="mt-2 leading-7 text-zinc-400">
-          Add its basic details now. Prerequisites can be changed later.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
+            Add to the timeline
+          </p>
+          <h2 className="mt-2 text-2xl font-bold text-white">New Movie</h2>
+          <p className="mt-1.5 text-sm leading-6 text-zinc-300/85">
+            Register a chapter and optionally link what viewers must watch
+            first.
+          </p>
+        </div>
+
+        <span className="grid size-10 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
+          +
+        </span>
       </div>
 
-      <div className="mt-7 grid gap-5 sm:grid-cols-2">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <label className="sm:col-span-2">
-          <span className="mb-2 block text-sm font-medium text-zinc-300">
+          <span className="mb-1.5 block font-mono text-xs uppercase tracking-[0.14em] text-zinc-300">
             Title
           </span>
           <input
@@ -100,16 +107,16 @@ export default function MovieForm({ movies, isSaving, onCreate }) {
             type="text"
             value={form.title}
             onChange={updateField}
-            placeholder="Avengers: Doomsday"
+            placeholder="Avengers: Secret Wars"
             autoComplete="off"
             required
-            className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition placeholder:text-zinc-600 focus:border-red-400 focus:ring-2 focus:ring-red-400/20"
+            className="w-full rounded-2xl border border-white/15 bg-black/40 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/45 focus:bg-black/60"
           />
         </label>
 
         <label>
-          <span className="mb-2 block text-sm font-medium text-zinc-300">
-            Release year
+          <span className="mb-1.5 block font-mono text-xs uppercase tracking-[0.14em] text-zinc-300">
+            Release Year
           </span>
           <input
             name="releaseYear"
@@ -119,13 +126,13 @@ export default function MovieForm({ movies, isSaving, onCreate }) {
             value={form.releaseYear}
             onChange={updateField}
             required
-            className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-400/20"
+            className="w-full rounded-2xl border border-white/15 bg-black/40 px-4 py-3 text-sm text-white outline-none transition focus:border-white/45 focus:bg-black/60"
           />
         </label>
 
         <label>
-          <span className="mb-2 block text-sm font-medium text-zinc-300">
-            Runtime in minutes
+          <span className="mb-1.5 block font-mono text-xs uppercase tracking-[0.14em] text-zinc-300">
+            Runtime (1–300m)
           </span>
           <input
             name="runtimeMinutes"
@@ -135,59 +142,88 @@ export default function MovieForm({ movies, isSaving, onCreate }) {
             step="1"
             value={form.runtimeMinutes}
             onChange={updateField}
-            placeholder="180"
+            placeholder="165"
             required
-            className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition placeholder:text-zinc-600 focus:border-red-400 focus:ring-2 focus:ring-red-400/20"
+            className="w-full rounded-2xl border border-white/15 bg-black/40 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/45 focus:bg-black/60"
           />
         </label>
       </div>
 
       <fieldset className="mt-6">
-        <legend className="text-sm font-medium text-zinc-300">
-          Prerequisite movies
-        </legend>
+        <div className="flex items-center justify-between gap-2">
+          <legend className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-300">
+            Prerequisite Movies
+          </legend>
+          {form.prerequisiteIds.length > 0 ? (
+            <button
+              type="button"
+              onClick={() =>
+                setForm((current) => ({ ...current, prerequisiteIds: [] }))
+              }
+              className="font-mono text-[11px] text-sky-300 hover:text-white"
+            >
+              Clear ({form.prerequisiteIds.length})
+            </button>
+          ) : (
+            <span className="font-mono text-[11px] text-zinc-500">
+              Optional
+            </span>
+          )}
+        </div>
+
         {movies.length === 0 ? (
-          <p className="mt-3 rounded-xl border border-dashed border-white/10 p-4 text-sm text-zinc-500">
+          <p className="mt-2.5 rounded-2xl border border-dashed border-white/15 bg-black/25 p-4 text-xs text-zinc-400">
             Add this first movie, then future movies can depend on it.
           </p>
         ) : (
-          <div className="mt-3 grid max-h-48 gap-2 overflow-y-auto rounded-xl border border-white/10 bg-black/20 p-3 sm:grid-cols-2">
-            {movies.map((movie) => (
-              <label
-                key={movie._id}
-                className="flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/[0.06]"
-              >
-                <input
-                  type="checkbox"
-                  checked={form.prerequisiteIds.includes(movie._id)}
-                  onChange={() => togglePrerequisite(movie._id)}
-                  className="mt-0.5 size-4 accent-red-500"
-                />
-                <span>
-                  <span className="block font-medium text-zinc-200">
-                    {movie.title}
+          <div className="poster-rail mt-2.5 grid max-h-52 gap-2 overflow-y-auto rounded-2xl border border-white/15 bg-black/35 p-3">
+            {movies.map((movie) => {
+              const isSelected = form.prerequisiteIds.includes(movie._id);
+
+              return (
+                <label
+                  key={movie._id}
+                  className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-sm transition ${
+                    isSelected
+                      ? "border-white/40 bg-white/[0.15] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]"
+                      : "border-white/10 bg-white/[0.03] text-zinc-300 hover:border-white/25 hover:bg-white/[0.08]"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => togglePrerequisite(movie._id)}
+                      className="size-4 accent-emerald-400"
+                    />
+                    <span className="font-medium">{movie.title}</span>
                   </span>
-                  <span className="text-zinc-500">{movie.releaseYear}</span>
-                </span>
-              </label>
-            ))}
+                  <span className="font-mono text-xs text-zinc-400">
+                    {movie.releaseYear}
+                  </span>
+                </label>
+              );
+            })}
           </div>
         )}
       </fieldset>
 
-      <label className="mt-6 flex w-fit cursor-pointer items-center gap-3 text-sm text-zinc-300">
+      <label className="mt-5 flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-zinc-200 transition hover:border-white/30 hover:bg-black/45">
+        <span>I have already watched this movie</span>
         <input
           name="watched"
           type="checkbox"
           checked={form.watched}
           onChange={updateField}
-          className="size-4 accent-red-500"
+          className="size-4 accent-emerald-400"
         />
-        I have already watched this movie
       </label>
 
       {validationError ? (
-        <p role="alert" className="mt-5 text-sm font-medium text-red-300">
+        <p
+          role="alert"
+          className="mt-4 rounded-xl border border-rose-400/30 bg-rose-950/35 px-3.5 py-2.5 text-xs font-medium text-rose-200"
+        >
           {validationError}
         </p>
       ) : null}
@@ -195,9 +231,9 @@ export default function MovieForm({ movies, isSaving, onCreate }) {
       <button
         type="submit"
         disabled={isSaving}
-        className="mt-7 w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white transition hover:bg-red-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-6 w-full rounded-full border border-white/35 bg-white/[0.16] px-6 py-3.5 text-xs font-extrabold uppercase tracking-[0.18em] text-white backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_12px_30px_rgba(0,0,0,0.4)] transition duration-200 hover:scale-[1.01] hover:border-white/55 hover:bg-white/[0.24] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isSaving ? "Adding movie..." : "Add movie"}
+        {isSaving ? "Adding Movie..." : "+ Add Movie to Timeline"}
       </button>
     </form>
   );
