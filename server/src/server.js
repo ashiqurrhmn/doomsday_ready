@@ -8,9 +8,37 @@ import movieRoutes from "./routes/movie.routes.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+let connectionPromise = null;
+
+async function connectToDatabase() {
+  if (!process.env.MONGODB_URI) {
+    throw new Error("MONGODB_URI is missing");
+  }
+
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose
+      .connect(process.env.MONGODB_URI)
+      .catch((error) => {
+        connectionPromise = null;
+        throw error;
+      });
+  }
+
+  return connectionPromise;
+}
+
 app.use(express.json());
-app.use("/api/cinemas", cinemaRoutes);
-app.use("/api/movies", movieRoutes);
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Doomsday Ready API is running",
+  });
+});
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({
@@ -19,23 +47,17 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-async function startServer() {
+app.use("/api", async (req, res, next) => {
   try {
-    if (!process.env.MONGODB_URI) {
-      throw new Error("MONGODB_URI is missing");
-    }
-
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log("MongoDB connected successfully");
-
-    app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
-    });
+    await connectToDatabase();
+    return next();
   } catch (error) {
-    console.error("Server startup failed:", error.message);
-    process.exit(1);
+    return next(error);
   }
-}
+});
+
+app.use("/api/cinemas", cinemaRoutes);
+app.use("/api/movies", movieRoutes);
 
 app.use((error, req, res, next) => {
   if (error instanceof SyntaxError && error.status === 400) {
@@ -57,4 +79,22 @@ app.use((error, req, res, next) => {
   });
 });
 
-startServer();
+async function startServer() {
+  try {
+    await connectToDatabase();
+    console.log("MongoDB connected successfully");
+
+    app.listen(PORT, () => {
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Server startup failed:", error.message);
+    process.exit(1);
+  }
+}
+
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
